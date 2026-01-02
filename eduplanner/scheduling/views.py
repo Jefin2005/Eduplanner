@@ -3,6 +3,9 @@ from academics.models import Faculty, Subject, Classroom
 from .models import TimetableEntry
 from ga_engine.ga_runner import run_ga
 
+def dashboard(request):
+    return render(request, "dashboard.html")
+
 def generate_timetable(request):
     TimetableEntry.objects.all().delete()
 
