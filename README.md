@@ -1,0 +1,2 @@
+# Eduplanner
+a timetable generator
