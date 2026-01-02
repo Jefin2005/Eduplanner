@@ -4,7 +4,6 @@ from academics.models import Faculty, Subject, Classroom
 from .models import TimetableEntry
 
 def generate_timetable(request):
-    # Clear old timetable
     TimetableEntry.objects.all().delete()
 
     days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
@@ -14,18 +13,17 @@ def generate_timetable(request):
     subjects = list(Subject.objects.all())
     rooms = list(Classroom.objects.all())
 
-    # Tracking sets
-    faculty_time = set()     # (faculty_id, day, period)
-    room_time = set()        # (room_id, day, period)
-    faculty_day_load = {}    # (faculty_id, day) → count
-
-    timetable = []
+    # Tracking
+    faculty_time = set()              # (faculty_id, day, period)
+    room_time = set()                 # (room_id, day, period)
+    faculty_day_load = {}             # (faculty_id, day) → count
+    faculty_week_load = {}            # faculty_id → total hours
 
     for day in days:
         for period in range(1, periods_per_day + 1):
 
             attempts = 0
-            while attempts < 20:
+            while attempts < 30:
                 subject = random.choice(subjects)
                 faculty = random.choice(faculties)
                 room = random.choice(rooms)
@@ -49,7 +47,13 @@ def generate_timetable(request):
                     attempts += 1
                     continue
 
-                # ✅ All rules satisfied → save entry
+                # Rule‑4: Weekly workload limit
+                current_load = faculty_week_load.get(faculty.id, 0)
+                if current_load + subject.weekly_hours > faculty.max_hours:
+                    attempts += 1
+                    continue
+
+                # ✅ All rules satisfied → assign
                 TimetableEntry.objects.create(
                     day=day,
                     period=period,
@@ -61,6 +65,7 @@ def generate_timetable(request):
                 faculty_time.add(f_key)
                 room_time.add(r_key)
                 faculty_day_load[fd_key] = faculty_day_load.get(fd_key, 0) + 1
+                faculty_week_load[faculty.id] = current_load + subject.weekly_hours
 
                 break
 
