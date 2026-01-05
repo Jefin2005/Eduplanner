@@ -12,11 +12,7 @@
     <tr>
         <th>Day</th>
         {% for slot in time_slots %}
-            {% if slot == "LUNCH" %}
-                <th>Lunch Break</th>
-            {% else %}
-                <th>{{ slot }}</th>
-            {% endif %}
+            <th>{{ slot }}</th>
         {% endfor %}
     </tr>
 
@@ -24,17 +20,21 @@
     <tr>
         <th>{{ day }}</th>
 
+        {% with p=1 %}
         {% for slot in time_slots %}
-            {% if slot == "LUNCH" %}
-                <td style="background:#f0f0f0; font-weight:bold;">
-                    LUNCH
+            {% if slot == "LUNCH" or slot == "RECESS" %}
+                <td style="background:#f2f2f2; font-weight:bold;">
+                    {{ slot }}
                 </td>
             {% else %}
                 <td>
-                    {{ timetable|get_item:day|get_item:forloop.counter|default:"" }}
+                    {{ timetable|get_item:day|get_item:p|default:"" }}
                 </td>
+                {% with p=p|add:1 %}{% endwith %}
             {% endif %}
         {% endfor %}
+        {% endwith %}
+
     </tr>
     {% endfor %}
 </table>
