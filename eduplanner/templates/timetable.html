@@ -1,25 +1,30 @@
+{% load custom_filters %}
 {% extends "base.html" %}
-
 {% block content %}
-<h2>Generated Timetable</h2>
 
-<table>
+<h2 style="text-align:center;">
+    COMPUTER SCIENCE & ENGINEERING – 2 (S6)<br>
+    Batch 2023–27 | Room No: 310B
+</h2>
+
+<table border="1" style="width:100%; border-collapse:collapse; text-align:center;">
     <tr>
         <th>Day</th>
-        <th>Period</th>
-        <th>Subject</th>
-        <th>Faculty</th>
-        <th>Room</th>
+        {% for slot in time_slots %}
+            <th>{{ slot }}</th>
+        {% endfor %}
     </tr>
 
-    {% for e in entries %}
+    {% for day in days %}
     <tr>
-        <td>{{ e.day }}</td>
-        <td>{{ e.period }}</td>
-        <td>{{ e.subject.name }}</td>
-        <td>{{ e.faculty.name }}</td>
-        <td>{{ e.classroom.room_no }}</td>
+        <th>{{ day }}</th>
+        {% for p in range(1, time_slots|length + 1) %}
+            <td>
+                {{ timetable|get_item:day|get_item:p|default:"-" }}
+            </td>
+        {% endfor %}
     </tr>
     {% endfor %}
 </table>
+
 {% endblock %}
