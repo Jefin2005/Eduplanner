@@ -2,6 +2,9 @@ from collections import defaultdict
 from django.shortcuts import render
 from .models import TimetableEntry
 
+def dashboard(request):
+    return render(request, "dashboard.html")
+
 def generate_timetable(request):
     entries = TimetableEntry.objects.all()
 
