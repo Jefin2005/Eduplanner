@@ -39,42 +39,45 @@ class ClassRoomGroup(models.Model):
 # FACULTY (WITH AUTO ID)
 # ======================
 
+from django.db import models
+
 class Faculty(models.Model):
-    teacher_id = models.CharField(
+    faculty_id = models.CharField(
         max_length=10,
         unique=True,
         blank=True
     )
-    name = models.CharField(max_length=100)
+    department = models.ForeignKey(
+        'Department',
+        on_delete=models.CASCADE
+    )
     max_hours = models.IntegerField()
-    department = models.ForeignKey(Department, on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
         """
-        Auto-generate Teacher ID like:
+        Auto-generate Faculty ID like:
         SCS01, SCS02, SEC01, etc.
         """
-        if not self.teacher_id:
+        if not self.faculty_id:
             dept_code = self.department.name.upper()
 
             last_faculty = Faculty.objects.filter(
                 department=self.department,
-                teacher_id__startswith=f"S{dept_code}"
-            ).order_by("teacher_id").last()
+                faculty_id__startswith=f"S{dept_code}"
+            ).order_by("faculty_id").last()
 
             if last_faculty:
-                last_number = int(last_faculty.teacher_id[-2:])
+                last_number = int(last_faculty.faculty_id[-2:])
                 new_number = last_number + 1
             else:
                 new_number = 1
 
-            self.teacher_id = f"S{dept_code}{new_number:02d}"
+            self.faculty_id = f"S{dept_code}{new_number:02d}"
 
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.teacher_id} - {self.name}"
-
+        return self.faculty_id
 
 # ======================
 # SUBJECTS

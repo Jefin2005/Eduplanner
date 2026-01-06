@@ -28,9 +28,8 @@ class ClassRoomGroupForm(forms.ModelForm):
 class FacultyForm(forms.ModelForm):
     class Meta:
         model = Faculty
-        fields = ['name', 'department', 'max_hours']
-
-
+        fields = ["department", "max_hours"]
+        
 class SubjectForm(forms.ModelForm):
     class Meta:
         model = Subject
