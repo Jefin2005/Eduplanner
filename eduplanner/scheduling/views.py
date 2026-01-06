@@ -1,90 +1,58 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from collections import defaultdict
 
-# Timetable model
+from academics.models import Semester, ClassRoomGroup, Subject, Faculty
 from .models import TimetableEntry
 
-# Dashboard forms
-from academics.forms import (
-    CollegeForm,
-    DepartmentForm,
-    SemesterForm,
-    ClassRoomGroupForm,
-    FacultyForm,
-    SubjectForm,
-)
 
 # =========================
-# DASHBOARD VIEW (ADMIN INPUT)
+# DASHBOARD VIEW
 # =========================
 def dashboard(request):
-    context = {
-        "college_form": CollegeForm(),
-        "department_form": DepartmentForm(),
-        "semester_form": SemesterForm(),
-        "class_form": ClassRoomGroupForm(),
-        "faculty_form": FacultyForm(),
-        "subject_form": SubjectForm(),
-    }
-
-    if request.method == "POST":
-        form_type = request.POST.get("form_type")
-
-        if form_type == "college":
-            CollegeForm(request.POST).save()
-
-        elif form_type == "department":
-            DepartmentForm(request.POST).save()
-
-        elif form_type == "semester":
-            SemesterForm(request.POST).save()
-
-        elif form_type == "class":
-            ClassRoomGroupForm(request.POST).save()
-
-        elif form_type == "faculty":
-            FacultyForm(request.POST).save()
-
-        elif form_type == "subject":
-            SubjectForm(request.POST).save()
-
-        return redirect("/")
-
-    return render(request, "dashboard.html", context)
+    """
+    Simple dashboard page with a Generate Timetable button
+    """
+    return render(request, "dashboard.html")
 
 
 # =========================
 # GENERATE TIMETABLE VIEW
 # =========================
 def generate_timetable(request):
-    entries = TimetableEntry.objects.all()
+    # Clear old timetable
+    TimetableEntry.objects.all().delete()
 
     days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+    periods_per_day = 7
 
-    # DISPLAY SLOTS (includes RECESS & LUNCH)
-    time_slots = [
-        "8:45-9:35",
-        "9:35-10:25",
-        "RECESS",
-        "10:35-11:30",
-        "11:30-12:15",
-        "LUNCH",
-        "1:05-1:55",
-        "RECESS",
-        "2:05-2:55",
-        "2:55-3:45",
-    ]
+    # TEMP: Generate for Semester 5
+    semester = Semester.objects.get(number=5)
 
-    # timetable[day][period] = subject
-    timetable = defaultdict(dict)
+    class_groups = ClassRoomGroup.objects.filter(semester=semester)
+    subjects = list(Subject.objects.filter(semester=semester))
+    faculties = list(Faculty.objects.all())
 
-    for entry in entries:
-        timetable[entry.day][entry.period] = entry.subject.name
+    for class_group in class_groups:
+        for day in days:
+            for period in range(1, periods_per_day + 1):
+                subject = subjects[(period - 1) % len(subjects)]
+                faculty = faculties[(period - 1) % len(faculties)]
 
-    context = {
-        "days": days,
-        "time_slots": time_slots,
-        "timetable": timetable,
-    }
+                TimetableEntry.objects.create(
+                    day=day,
+                    period=period,
+                    class_group=class_group,
+                    subject=subject,
+                    faculty=faculty,
+                    classroom=None  # can be assigned later
+                )
 
-    return render(request, "timetable.html", context)
+    timetable_by_class = defaultdict(list)
+    for entry in TimetableEntry.objects.all():
+        timetable_by_class[entry.class_group].append(entry)
+
+    return render(
+        request,
+        "timetable.html",
+        {"timetable_by_class": timetable_by_class}
+    )

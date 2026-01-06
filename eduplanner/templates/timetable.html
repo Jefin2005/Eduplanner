@@ -1,42 +1,38 @@
 {% extends "base.html" %}
-{% load custom_filters %}
-
 {% block content %}
 
-<h2 style="text-align:center;">
-    COMPUTER SCIENCE & ENGINEERING – 2 (S6)<br>
-    Batch 2023–27 | Room No: 310B
-</h2>
+<h2 style="text-align:center;">Generated Timetables</h2>
 
-<table border="1" style="width:100%; border-collapse:collapse; text-align:center;">
-    <tr>
-        <th>Day</th>
-        {% for slot in time_slots %}
-            <th>{{ slot }}</th>
-        {% endfor %}
-    </tr>
+{% for class_group, entries in timetable_by_class.items %}
+    <h3>{{ class_group }}</h3>
 
-    {% for day in days %}
-    <tr>
-        <th>{{ day }}</th>
+    <table border="1" style="width:100%; margin-bottom:40px; text-align:center;">
+        <tr>
+            <th>Day</th>
+            <th>P1</th>
+            <th>P2</th>
+            <th>P3</th>
+            <th>P4</th>
+            <th>P5</th>
+            <th>P6</th>
+            <th>P7</th>
+        </tr>
 
-        {% with p=1 %}
-        {% for slot in time_slots %}
-            {% if slot == "LUNCH" or slot == "RECESS" %}
-                <td style="background:#f2f2f2; font-weight:bold;">
-                    {{ slot }}
-                </td>
-            {% else %}
+        {% for day in "Monday Tuesday Wednesday Thursday Friday".split %}
+        <tr>
+            <th>{{ day }}</th>
+            {% for p in range(1,8) %}
                 <td>
-                    {{ timetable|get_item:day|get_item:p|default:"" }}
+                    {% for e in entries %}
+                        {% if e.day == day and e.period == p %}
+                            {{ e.subject.name }} ({{ e.faculty.faculty_id }})
+                        {% endif %}
+                    {% endfor %}
                 </td>
-                {% with p=p|add:1 %}{% endwith %}
-            {% endif %}
+            {% endfor %}
+        </tr>
         {% endfor %}
-        {% endwith %}
-
-    </tr>
-    {% endfor %}
-</table>
+    </table>
+{% endfor %}
 
 {% endblock %}
