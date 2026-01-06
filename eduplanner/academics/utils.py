@@ -1,3 +1,4 @@
+# academics/utils.py
 from .models import College, Department, Semester, ClassRoomGroup
 
 def setup_initial_data():
@@ -13,7 +14,7 @@ def setup_initial_data():
             name=dept_name
         )
 
-        for sem_no in range(1, 9):  # 8 semesters
+        for sem_no in range(1, 9):
             semester, _ = Semester.objects.get_or_create(
                 department=dept,
                 number=sem_no
