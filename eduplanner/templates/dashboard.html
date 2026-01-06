@@ -1,14 +1,54 @@
 {% extends "base.html" %}
-
 {% block content %}
-<h2>Welcome Admin</h2>
 
-<div class="card">
-    <p>
-        Use this system to generate an optimized timetable
-        using academic rules and Genetic Algorithm.
-    </p>
+<h2>Admin Setup Dashboard</h2>
 
-    <a class="btn" href="/generate/">Generate Timetable</a>
-</div>
+<h3>Add College</h3>
+<form method="post">
+    {% csrf_token %}
+    {{ college_form.as_p }}
+    <input type="hidden" name="form_type" value="college">
+    <button type="submit">Save College</button>
+</form>
+
+<h3>Add Department</h3>
+<form method="post">
+    {% csrf_token %}
+    {{ department_form.as_p }}
+    <input type="hidden" name="form_type" value="department">
+    <button type="submit">Save Department</button>
+</form>
+
+<h3>Add Semester</h3>
+<form method="post">
+    {% csrf_token %}
+    {{ semester_form.as_p }}
+    <input type="hidden" name="form_type" value="semester">
+    <button type="submit">Save Semester</button>
+</form>
+
+<h3>Add Class</h3>
+<form method="post">
+    {% csrf_token %}
+    {{ class_form.as_p }}
+    <input type="hidden" name="form_type" value="class">
+    <button type="submit">Save Class</button>
+</form>
+
+<h3>Add Faculty</h3>
+<form method="post">
+    {% csrf_token %}
+    {{ faculty_form.as_p }}
+    <input type="hidden" name="form_type" value="faculty">
+    <button type="submit">Save Faculty</button>
+</form>
+
+<h3>Add Subject</h3>
+<form method="post">
+    {% csrf_token %}
+    {{ subject_form.as_p }}
+    <input type="hidden" name="form_type" value="subject">
+    <button type="submit">Save Subject</button>
+</form>
+
 {% endblock %}

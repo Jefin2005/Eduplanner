@@ -1,14 +1,67 @@
+from django.shortcuts import render, redirect
 from collections import defaultdict
-from django.shortcuts import render
+
+# Timetable model
 from .models import TimetableEntry
+
+# Dashboard forms
+from academics.forms import (
+    CollegeForm,
+    DepartmentForm,
+    SemesterForm,
+    ClassRoomGroupForm,
+    FacultyForm,
+    SubjectForm,
+)
+
+# =========================
+# DASHBOARD VIEW (ADMIN INPUT)
+# =========================
 def dashboard(request):
-    return render(request, "dashboard.html")
+    context = {
+        "college_form": CollegeForm(),
+        "department_form": DepartmentForm(),
+        "semester_form": SemesterForm(),
+        "class_form": ClassRoomGroupForm(),
+        "faculty_form": FacultyForm(),
+        "subject_form": SubjectForm(),
+    }
+
+    if request.method == "POST":
+        form_type = request.POST.get("form_type")
+
+        if form_type == "college":
+            CollegeForm(request.POST).save()
+
+        elif form_type == "department":
+            DepartmentForm(request.POST).save()
+
+        elif form_type == "semester":
+            SemesterForm(request.POST).save()
+
+        elif form_type == "class":
+            ClassRoomGroupForm(request.POST).save()
+
+        elif form_type == "faculty":
+            FacultyForm(request.POST).save()
+
+        elif form_type == "subject":
+            SubjectForm(request.POST).save()
+
+        return redirect("/")
+
+    return render(request, "dashboard.html", context)
+
+
+# =========================
+# GENERATE TIMETABLE VIEW
+# =========================
 def generate_timetable(request):
     entries = TimetableEntry.objects.all()
 
     days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 
-    # Slots only for DISPLAY
+    # DISPLAY SLOTS (includes RECESS & LUNCH)
     time_slots = [
         "8:45-9:35",
         "9:35-10:25",
@@ -22,8 +75,9 @@ def generate_timetable(request):
         "2:55-3:45",
     ]
 
-    # Store only teaching periods (1–7)
+    # timetable[day][period] = subject
     timetable = defaultdict(dict)
+
     for entry in entries:
         timetable[entry.day][entry.period] = entry.subject.name
 
