@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from collections import defaultdict
 
-from academics.models import Semester, ClassRoomGroup, Subject, Faculty
+from academics.models import Department, Semester, ClassRoomGroup, Subject, Faculty
 from .models import TimetableEntry
 
 
@@ -25,12 +25,13 @@ def generate_timetable(request):
     days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
     periods_per_day = 7
 
-    # TEMP: Generate for Semester 5
-    semester = Semester.objects.get(number=5)
+    # ✅ SELECT DEPARTMENT + SEMESTER (IMPORTANT)
+    department = Department.objects.get(name="CS")
+    semester = Semester.objects.get(department=department, number=5)
 
     class_groups = ClassRoomGroup.objects.filter(semester=semester)
     subjects = list(Subject.objects.filter(semester=semester))
-    faculties = list(Faculty.objects.all())
+    faculties = list(Faculty.objects.filter(department=department))
 
     for class_group in class_groups:
         for day in days:
@@ -55,4 +56,4 @@ def generate_timetable(request):
         request,
         "timetable.html",
         {"timetable_by_class": timetable_by_class}
-    )
+    ) 
